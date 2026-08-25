@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioTunuyán 🌿</title>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+/>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+:root{
+    --verde-oscuro:#123d2a;
+    --verde:#237a4b;
+    --verde-claro:#65bd72;
+    --verde-suave:#e2f4e1;
+    --fondo:#eef7eb;
+    --blanco:#ffffff;
+    --texto:#17372a;
+    --gris:#668074;
+    --amarillo:#f1c84b;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--fondo);
+    color:var(--texto);
+}
+
+/* HEADER */
+
+header{
+    height:70px;
+    background:linear-gradient(135deg,#103a27,#237a4b);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 22px;
+    position:relative;
+    z-index:2000;
+    box-shadow:0 4px 15px rgba(0,0,0,.25);
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:21px;
+    font-weight:bold;
+}
+
+.logo-icon{
+    width:45px;
+    height:45px;
+    background:white;
+    color:var(--verde);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+}
+
+.stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.stat{
+    background:rgba(255,255,255,.15);
+    padding:8px 12px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+/* APP */
+
+.app{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 370px;
+    height:calc(100vh - 70px);
+}
+
+/* MAPA */
+
+.map-container{
+    position:relative;
+    min-width:0;
+    min-height:0;
+}
+
+#map{
+    width:100%;
+    height:100%;
+    min-height:400px;
+}
+
+.map-info{
+    position:absolute;
+    left:18px;
+    top:18px;
+    z-index:1000;
+    background:rgba(255,255,255,.96);
+    padding:15px 18px;
+    border-radius:17px;
+    box-shadow:0 8px 25px rgba(0,0,0,.15);
+    max-width:300px;
+}
+
+.map-info h2{
+    color:var(--verde-oscuro);
+    font-size:18px;
+}
+
+.map-info p{
+    color:var(--gris);
+    font-size:12px;
+    margin-top:5px;
+    line-height:1.4;
+}
+
+.map-button{
+    position:absolute;
+    left:18px;
+    bottom:20px;
+    z-index:1000;
+    border:0;
+    background:var(--verde);
+    color:white;
+    padding:12px 16px;
+    border-radius:14px;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,.2);
+}
+
+.map-button:hover{
+    background:var(--verde-oscuro);
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    background:white;
+    padding:18px;
+    overflow-y:auto;
+    box-shadow:-5px 0 20px rgba(0,0,0,.1);
+    z-index:1500;
+}
+
+.profile{
+    background:linear-gradient(135deg,#e0f4df,#f6faef);
+    padding:16px;
+    border-radius:18px;
+}
+
+.profile-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.avatar{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:var(--verde);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+}
+
+.profile h2{
+    font-size:17px;
+}
+
+.profile p{
+    font-size:12px;
+    color:var(--gris);
+    margin-top:3px;
+}
+
+.progress-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    margin-top:14px;
+}
+
+.progress{
+    height:8px;
+    background:#cde4cc;
+    border-radius:20px;
+    margin-top:5px;
+    overflow:hidden;
+}
+
+#progressBar{
+    width:0%;
+    height:100%;
+    background:var(--verde);
+    transition:.4s;
+}
+
+.section-title{
+    font-size:16px;
+    margin:20px 0 10px;
+}
+
+/* FILTROS */
+
+.filters{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+}
+
+.filter{
+    border:1px solid #cde2ce;
+    background:white;
+    color:var(--verde);
+    padding:8px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.filter:hover,
+.filter.active{
+    background:var(--verde);
+    color:white;
+}
+
+/* ESPECIES */
+
+.species-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.species-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    border:1px solid #dfebdf;
+    border-radius:14px;
+    background:white;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.species-card:hover{
+    transform:translateY(-2px);
+    border-color:var(--verde-claro);
+    box-shadow:0 5px 15px rgba(35,122,75,.12);
+}
+
+.species-icon{
+    width:48px;
+    height:48px;
+    flex-shrink:0;
+    border-radius:12px;
+    background:var(--verde-suave);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+}
+
+.species-info{
+    flex:1;
+}
+
+.species-info h3{
+    font-size:13px;
+}
+
+.species-info p{
+    color:var(--gris);
+    font-size:10px;
+    margin-top:3px;
+}
+
+.rarity{
+    font-size:9px;
+    background:#edf7ec;
+    color:var(--verde);
+    padding:5px 7px;
+    border-radius:10px;
+}
+
+/* BOTÓN UBICACIÓN */
+
+.location-btn{
+    width:100%;
+    border:0;
+    margin-top:17px;
+    padding:13px;
+    border-radius:13px;
+    background:var(--verde);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.location-btn:hover{
+    background:var(--verde-oscuro);
+}
+
+/* POPUP */
+
+.popup{
+    text-align:center;
+    min-width:220px;
+}
+
+.popup-icon{
+    font-size:42px;
+}
+
+.popup h3{
+    color:var(--verde-oscuro);
+    margin:5px 0;
+}
+
+.scientific{
+    color:#668074;
+    font-size:11px;
+    font-style:italic;
+    margin-bottom:8px;
+}
+
+.popup p{
+    color:#566a5e;
+    font-size:12px;
+    line-height:1.45;
+    margin-bottom:8px;
+}
+
+.discover-btn{
+    width:100%;
+    padding:9px;
+    border:0;
+    border-radius:9px;
+    background:var(--verde);
+    color:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.discover-btn:hover{
+    background:var(--verde-oscuro);
+}
+
+/* NOTIFICACIÓN */
+
+#notification{
+    position:fixed;
+    top:85px;
+    right:20px;
+    z-index:5000;
+    background:var(--verde-oscuro);
+    color:white;
+    padding:13px 17px;
+    border-radius:13px;
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+    transform:translateX(150%);
+    transition:.35s;
+    max-width:300px;
+    font-size:13px;
+}
+
+#notification.show{
+    transform:translateX(0);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:850px){
+
+    body{
+        overflow:auto;
+    }
+
+    header{
+        height:auto;
+        min-height:70px;
+        flex-wrap:wrap;
+        gap:8px;
+        padding:10px;
+    }
+
+    .stats{
+        width:100%;
+    }
+
+    .app{
+        display:block;
+        height:auto;
+    }
+
+    .map-container{
+        height:60vh;
+    }
+
+    #map{
+        height:100%;
+    }
+
+    .sidebar{
+        min-height:600px;
+    }
+}
+
+@media(max-width:500px){
+
+    .logo{
+        font-size:17px;
+    }
+
+    .stat{
+        font-size:10px;
+        padding:6px 8px;
+    }
+
+    .map-info{
+        left:10px;
+        top:10px;
+        max-width:250px;
+    }
+
+    .map-container{
+        height:55vh;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+        <div class="logo-icon">🌿</div>
+        <span>BioTunuyán</span>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            ⭐ Nivel <span id="level">1</span>
+        </div>
+
+        <div class="stat">
+            🌱 <span id="discovered">0</span> descubiertas
+        </div>
+
+        <div class="stat">
+            🏆 <span id="xp">0</span> XP
+        </div>
+
+    </div>
+
+</header>
+
+<div class="app">
+
+    <main class="map-container">
+
+        <div id="map"></div>
+
+        <div class="map-info">
+            <h2>🌎 BioTunuyán</h2>
+            <p>
+                Explorá Tunuyán, encontrá especies y completá
+                tu colección de biodiversidad.
+            </p>
+        </div>
+
+        <button
+            class="map-button"
+            onclick="centerTunuyan()">
+            📍 Centrar en Tunuyán
+        </button>
+
+    </main>
+
+    <aside class="sidebar">
+
+        <div class="profile">
+
+            <div class="profile-row">
+
+                <div class="avatar">
+                    🧭
+                </div>
+
+                <div>
+                    <h2>Explorador/a</h2>
+                    <p>Guardián de la biodiversidad</p>
+                </div>
+
+            </div>
+
+            <div class="progress-label">
+                <span>Progreso del nivel</span>
+                <span id="progressText">0 / 100 XP</span>
+            </div>
+
+            <div class="progress">
+                <div id="progressBar"></div>
+            </div>
+
+        </div>
+
+        <h3 class="section-title">
+            🔎 Categorías
+        </h3>
+
+        <div class="filters">
+
+            <button class="filter active" data-filter="all">
+                Todas
+            </button>
+
+            <button class="filter" data-filter="animal">
+                🐾 Animales
+            </button>
+
+            <button class="filter" data-filter="bird">
+                🐦 Aves
+            </button>
+
+            <button class="filter" data-filter="plant">
+                🌿 Plantas
+            </button>
+
+        </div>
+
+        <h3 class="section-title">
+            📖 Especies
+        </h3>
+
+        <div id="speciesList" class="species-list"></div>
+
+        <button
+            class="location-btn"
+            onclick="findPlayer()">
+            📍 Usar mi ubicación
+        </button>
+
+    </aside>
+
+</div>
+
+<div id="notification"></div>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin="">
+</script>
+
+<script>
+
+/* ==========================================================
+   CONFIGURACIÓN
+========================================================== */
+
+const TUNUYAN = [-33.5786, -69.0154];
+
+let xp = 0;
+let level = 1;
+
+const discovered = new Set();
+
+let map = null;
+let playerMarker = null;
+
+const markers = [];
+
+
+/* ==========================================================
+   ESPECIES
+========================================================== */
+
+const species = [
+
+    {
+        id:1,
+        name:"Tuco-tuco del Valle de Uco",
+        scientific:"Ctenomys uco",
+        type:"animal",
+        icon:"🐹",
+        rarity:"Especial",
+        xp:50,
+        lat:-33.585,
+        lng:-69.040,
+        description:
+        "Roedor subterráneo asociado al Valle de Uco."
+    },
+
+    {
+        id:2,
+        name:"Guanaco",
+        scientific:"Lama guanicoe",
+        type:"animal",
+        icon:"🦙",
+        rarity:"Raro",
+        xp:35,
+        lat:-33.620,
+        lng:-69.090,
+        description:
+        "Mamífero nativo de ambientes cordilleranos."
+    },
+
+    {
+        id:3,
+        name:"Puma",
+        scientific:"Puma concolor",
+        type:"animal",
+        icon:"🐆",
+        rarity:"Muy raro",
+        xp:60,
+        lat:-33.650,
+        lng:-69.120,
+        description:
+        "Felino nativo de los Andes y ambientes de montaña."
+    },
+
+    {
+        id:4,
+        name:"Zorro Colorado",
+        scientific:"Lycalopex culpaeus",
+        type:"animal",
+        icon:"🦊",
+        rarity:"Raro",
+        xp:35,
+        lat:-33.610,
+        lng:-69.070,
+        description:
+        "Carnívoro nativo de la región cordillerana."
+    },
+
+    {
+        id:5,
+        name:"Choique",
+        scientific:"Rhea pennata",
+        type:"bird",
+        icon:"🪶",
+        rarity:"Raro",
+        xp:40,
+        lat:-33.600,
+        lng:-69.085,
+        description:
+        "Ave corredora característica de ambientes abiertos."
+    },
+
+    {
+        id:6,
+        name:"Pato del Torrente",
+        scientific:"Merganetta armata",
+        type:"bird",
+        icon:"🦆",
+        rarity:"Especial",
+        xp:45,
+        lat:-33.625,
+        lng:-69.105,
+        description:
+        "Ave asociada a cursos de agua rápidos de montaña."
+    },
+
+    {
+        id:7,
+        name:"Chimango",
+        scientific:"Milvago chimango",
+        type:"bird",
+        icon:"🦅",
+        rarity:"Común",
+        xp:15,
+        lat:-33.570,
+        lng:-69.025,
+        description:
+        "Ave rapaz frecuente de la región."
+    },
+
+    {
+        id:8,
+        name:"Jarilla",
+        scientific:"Larrea spp.",
+        type:"plant",
+        icon:"🌿",
+        rarity:"Común",
+        xp:15,
+        lat:-33.575,
+        lng:-69.000,
+        description:
+        "Arbusto característico de ambientes áridos."
+    },
+
+    {
+        id:9,
+        name:"Carqueja",
+        scientific:"Baccharis spp.",
+        type:"plant",
+        icon:"🌱",
+        rarity:"Común",
+        xp:15,
+        lat:-33.565,
+        lng:-69.035,
+        description:
+        "Planta nativa de ambientes naturales de Mendoza."
+    },
+
+    {
+        id:10,
+        name:"Chacal",
+        scientific:"Discaria trinervis",
+        type:"plant",
+        icon:"🌿",
+        rarity:"Poco común",
+        xp:20,
+        lat:-33.590,
+        lng:-69.055,
+        description:
+        "Arbusto nativo de ambientes naturales."
+    },
+
+    {
+        id:11,
+        name:"Cedrón",
+        scientific:"Aloysia citrodora",
+        type:"plant",
+        icon:"🍃",
+        rarity:"Poco común",
+        xp:20,
+        lat:-33.580,
+        lng:-69.030,
+        description:
+        "Planta aromática de la región."
+    },
+
+    {
+        id:12,
+        name:"Coirón",
+        scientific:"Stipa spp.",
+        type:"plant",
+        icon:"🌾",
+        rarity:"Común",
+        xp:15,
+        lat:-33.615,
+        lng:-69.080,
+        description:
+        "Pastos característicos de ambientes abiertos."
+    },
+
+    {
+        id:13,
+        name:"Cactáceas",
+        scientific:"Cactaceae",
+        type:"plant",
+        icon:"🌵",
+        rarity:"Poco común",
+        xp:20,
+        lat:-33.605,
+        lng:-69.060,
+        description:
+        "Plantas adaptadas a ambientes secos."
+    },
+
+    {
+        id:14,
+        name:"Tomillo de montaña",
+        scientific:"Acantholippia seriphioides",
+        type:"plant",
+        icon:"🌱",
+        rarity:"Especial",
+        xp:25,
+        lat:-33.635,
+        lng:-69.110,
+        description:
+        "Planta aromática adaptada a ambientes secos y de montaña."
+    }
+
+];
+
+
+/* ==========================================================
+   INICIAR MAPA
+========================================================== */
+
+function initMap(){
+
+    if(
+        typeof L === "undefined"
+    ){
+
+        document.getElementById("map").innerHTML = `
+            <div style="
+                height:100%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                background:#dcebd9;
+                color:#123d2a;
+                text-align:center;
+                padding:30px;
+                font-weight:bold;
+            ">
+                ⚠️ No se pudo cargar el mapa.<br>
+                Revisá tu conexión a Internet y recargá la página.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    map = L.map("map", {
+        zoomControl:true
+    }).setView(
+        TUNUYAN,
+        12
+    );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom:19,
+            attribution:
+            '&copy; OpenStreetMap contributors'
+        }
+    ).addTo(map);
+
+
+    addTunuyanMarker();
+
+    addSpeciesMarkers();
+
+    setTimeout(
+        function(){
+            map.invalidateSize();
+        },
+        300
+    );
+}
+
+
+/* ==========================================================
+   MARCADOR DE TUNUYÁN
+========================================================== */
+
+function addTunuyanMarker(){
+
+    const icon =
+        L.divIcon({
+            className:"",
+            html:`
+                <div style="
+                    width:48px;
+                    height:48px;
+                    background:#123d2a;
+                    border:4px solid white;
+                    border-radius:50%;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    font-size:23px;
+                    box-shadow:0 4px 12px rgba(0,0,0,.3);
+                ">
+                    📍
+                </div>
+            `,
+            iconSize:[48,48],
+            iconAnchor:[24,24]
+        });
+
+
+    L.marker(
+        TUNUYAN,
+        {icon:icon}
+    )
+    .addTo(map)
+    .bindPopup(`
+        <div style="text-align:center">
+            <strong>📍 Tunuyán</strong>
+            <br>
+            <small>Centro de BioTunuyán</small>
+        </div>
+    `);
+
+}
+
+
+/* ==========================================================
+   MARCADORES DE ESPECIES
+========================================================== */
+
+function addSpeciesMarkers(){
+
+    species.forEach(
+        function(item){
+
+            const icon =
+                L.divIcon({
+                    className:"",
+                    html:`
+                        <div style="
+                            width:44px;
+                            height:44px;
+                            background:white;
+                            border:3px solid #237a4b;
+                            border-radius:50%;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:24px;
+                            box-shadow:0 3px 10px rgba(0,0,0,.3);
+                        ">
+                            ${item.icon}
+                        </div>
+                    `,
+                    iconSize:[44,44],
+                    iconAnchor:[22,22]
+                });
+
+
+            const marker =
+                L.marker(
+                    [item.lat,item.lng],
+                    {icon:icon}
+                ).addTo(map);
+
+
+            marker.bindPopup(`
+                <div class="popup">
+
+                    <div class="popup-icon">
+                        ${item.icon}
+                    </div>
+
+                    <h3>
+                        ${item.name}
+                    </h3>
+
+                    <div class="scientific">
+                        ${item.scientific}
+                    </div>
+
+                    <p>
+                        ${item.description}
+                    </p>
+
+                    <p>
+                        ⭐ Rareza:
+                        <strong>
+                            ${item.rarity}
+                        </strong>
+                    </p>
+
+                    <p>
+                        🏆 Recompensa:
+                        <strong>
+                            +${item.xp} XP
+                        </strong>
+                    </p>
+
+                    <button
+                        class="discover-btn"
+                        onclick="discoverSpecies(${item.id})">
+                        🌿 Descubrir
+                    </button>
+
+                </div>
+            `);
+
+
+            markers.push({
+                marker:marker,
+                data:item
+            });
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   DESCUBRIR
+========================================================== */
+
+function discoverSpecies(id){
+
+    const item =
+        species.find(
+            function(s){
+                return s.id === id;
+            }
+        );
+
+
+    if(!item){
+        return;
+    }
+
+
+    if(
+        discovered.has(id)
+    ){
+
+        notify(
+            "Ya descubriste esta especie 🌿"
+        );
+
+        return;
+    }
+
+
+    discovered.add(id);
+
+    xp += item.xp;
+
+    updateStats();
+
+    renderSpecies();
+
+    if(map){
+        map.closePopup();
+    }
+
+    notify(
+        "¡Descubriste " +
+        item.icon +
+        " " +
+        item.name +
+        "! +" +
+        item.xp +
+        " XP"
+    );
+}
+
+
+/* ==========================================================
+   ESTADÍSTICAS
+========================================================== */
+
+function updateStats(){
+
+    level =
+        Math.floor(
+            xp / 100
+        ) + 1;
+
+
+    document.getElementById(
+        "level"
+    ).textContent =
+        level;
+
+
+    document.getElementById(
+        "xp"
+    ).textContent =
+        xp;
+
+
+    document.getElementById(
+        "discovered"
+    ).textContent =
+        discovered.size;
+
+
+    const current =
+        xp % 100;
+
+
+    document.getElementById(
+        "progressText"
+    ).textContent =
+        current + " / 100 XP";
+
+
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        current + "%";
+}
+
+
+/* ==========================================================
+   LISTA DE ESPECIES
+========================================================== */
+
+function renderSpecies(
+    filter="all"
+){
+
+    const list =
+        document.getElementById(
+            "speciesList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    species
+    .filter(
+        function(item){
+
+            if(filter === "all"){
+                return true;
+            }
+
+            return item.type === filter;
+
+        }
+    )
+    .forEach(
+        function(item){
+
+            const known =
+                discovered.has(
+                    item.id
+                );
+
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "species-card";
+
+
+            card.innerHTML = `
+
+                <div class="species-icon">
+                    ${
+                        known
+                        ? item.icon
+                        : "❓"
+                    }
+                </div>
+
+                <div class="species-info">
+
+                    <h3>
+                        ${
+                            known
+                            ? item.name
+                            : "Especie sin descubrir"
+                        }
+                    </h3>
+
+                    <p>
+                        ${
+                            known
+                            ? item.scientific
+                            : "Explorá el mapa para descubrirla"
+                        }
+                    </p>
+
+                </div>
+
+                <span class="rarity">
+                    ${
+                        known
+                        ? "✓"
+                        : "?"
+                    }
+                </span>
+            `;
+
+
+            card.onclick =
+                function(){
+
+                    if(!map){
+                        return;
+                    }
+
+
+                    map.flyTo(
+                        [
+                            item.lat,
+                            item.lng
+                        ],
+                        15,
+                        {
+                            duration:1
+                        }
+                    );
+
+
+                    const found =
+                        markers.find(
+                            function(m){
+                                return m.data.id === item.id;
+                            }
+                        );
+
+
+                    if(found){
+
+                        setTimeout(
+                            function(){
+                                found.marker.openPopup();
+                            },
+                            500
+                        );
+
+                    }
+
+                };
+
+
+            list.appendChild(
+                card
+            );
+
+        }
+    );
+}
+
+
+/* ==========================================================
+   FILTROS
+========================================================== */
+
+function setupFilters(){
+
+    const buttons =
+        document.querySelectorAll(
+            ".filter"
+        );
+
+
+    buttons.forEach(
+        function(button){
+
+            button.addEventListener(
+                "click",
+                function(){
+
+                    buttons.forEach(
+                        function(btn){
+                            btn.classList.remove(
+                                "active"
+                            );
+                        }
+                    );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    const filter =
+                        button.dataset.filter;
+
+
+                    renderSpecies(
+                        filter
+                    );
+
+
+                    markers.forEach(
+                        function(object){
+
+                            const visible =
+                                filter === "all" ||
+                                object.data.type === filter;
+
+
+                            if(visible){
+
+                                if(
+                                    !map.hasLayer(
+                                        object.marker
+                                    )
+                                ){
+
+                                    object.marker.addTo(
+                                        map
+                                    );
+
+                                }
+
+                            }else{
+
+                                if(
+                                    map.hasLayer(
+                                        object.marker
+                                    )
+                                ){
+
+                                    map.removeLayer(
+                                        object.marker
+                                    );
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+    );
+}
+
+
+/* ==========================================================
+   CENTRAR TUNUYÁN
+========================================================== */
+
+function centerTunuyan(){
+
+    if(!map){
+        return;
+    }
+
+
+    map.flyTo(
+        TUNUYAN,
+        12,
+        {
+            duration:1.2
+        }
+    );
+
+
+    notify(
+        "📍 Mapa centrado en Tunuyán"
+    );
+}
+
+
+/* ==========================================================
+   UBICACIÓN DEL JUGADOR
+========================================================== */
+
+function findPlayer(){
+
+    if(
+        !navigator.geolocation
+    ){
+
+        notify(
+            "Tu navegador no permite usar ubicación."
+        );
+
+        return;
+    }
+
+
+    notify(
+        "📍 Buscando tu ubicación..."
+    );
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position){
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+
+            const icon =
+                L.divIcon({
+                    className:"",
+                    html:`
+                        <div style="
+                            width:46px;
+                            height:46px;
+                            background:#237a4b;
+                            border:4px solid white;
+                            border-radius:50%;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:23px;
+                            box-shadow:0 4px 12px rgba(0,0,0,.3);
+                        ">
+                            🧭
+                        </div>
+                    `,
+                    iconSize:[46,46],
+                    iconAnchor:[23,23]
+                });
+
+
+            if(playerMarker){
+
+                playerMarker.setLatLng(
+                    [lat,lng]
+                );
+
+            }else{
+
+                playerMarker =
+                    L.marker(
+                        [lat,lng],
+                        {icon:icon}
+                    )
+                    .addTo(map)
+                    .bindPopup(
+                        "<strong>🧭 Tu ubicación</strong>"
+                    );
+
+            }
+
+
+            map.flyTo(
+                [lat,lng],
+                15,
+                {
+                    duration:1.2
+                }
+            );
+
+
+            notify(
+                "¡Encontramos tu ubicación! 🧭"
+            );
+
+        },
+
+        function(){
+
+            notify(
+                "No se pudo obtener tu ubicación. Revisá los permisos del navegador."
+            );
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:10000,
+            maximumAge:0
+        }
+    );
+}
+
+
+/* ==========================================================
+   NOTIFICACIONES
+========================================================== */
+
+function notify(message){
+
+    const box =
+        document.getElementById(
+            "notification"
+        );
+
+
+    box.textContent =
+        message;
+
+
+    box.classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        function(){
+            box.classList.remove(
+                "show"
+            );
+        },
+        3000
+    );
+}
+
+
+/* ==========================================================
+   INICIAR TODO
+========================================================== */
+
+window.addEventListener(
+    "load",
+    function(){
+
+        renderSpecies();
+
+        setupFilters();
+
+        initMap();
+
+        setTimeout(
+            function(){
+                notify(
+                    "🌿 ¡Bienvenido a BioTunuyán!"
+                );
+            },
+            1000
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
